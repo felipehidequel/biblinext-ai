@@ -2,7 +2,7 @@
 
 O BiblioNext é um sistema moderno para gerenciamento de bibliotecas, construído com as tecnologias mais recentes do ecossistema Next.js. Ele oferece um painel administrativo para que bibliotecários possam gerenciar o catálogo de livros e o fluxo de empréstimos de forma eficiente e intuitiva.
 
-Este projeto foi desenvolvido como um MVP (Mínimo Produto Viável) e demonstra o uso de Server Components, Server Actions e um mecanismo de fallback para garantir a resiliência dos dados.
+Este projeto foi desenvolvido como um MVP (Mínimo Produto Viável) e demonstra a visão do bibliotecário.
 
 ## 🚀 Funcionalidades Principais
 
