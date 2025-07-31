@@ -52,7 +52,7 @@ export const getUserById = async (id: string): Promise<User | undefined> => {
 
 
 export const getPendingRequests = async (): Promise<LoanRequest[]> => {
-    const q = query(collection(db, "requests"), where("status", "==", "Pending"));
+    const q = query(collection(db, "requests"), where("status", "==", "Pendente"));
     const querySnapshot = await getDocs(q);
     const requests: LoanRequest[] = [];
     

@@ -12,17 +12,17 @@ export function MainNav() {
     <SidebarMenu>
       <SidebarMenuItem>
         <Link href="/admin/books">
-          <SidebarMenuButton isActive={pathname === '/admin/books'} tooltip="Book Management">
+          <SidebarMenuButton isActive={pathname.startsWith('/admin/books')} tooltip="Gerenciar Livros">
             <BookOpenCheck />
-            Books
+            Livros
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <Link href="/admin">
-          <SidebarMenuButton isActive={pathname === '/admin'} tooltip="Loan Requests">
+          <SidebarMenuButton isActive={pathname === '/admin'} tooltip="Solicitações de Empréstimo">
             <MailQuestion />
-            Requests
+            Solicitações
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>

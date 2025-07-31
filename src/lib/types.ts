@@ -21,7 +21,7 @@ export interface LoanRequest {
   bookId: string;
   userId: string;
   requestDate: Date;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pendente' | 'Aprovado' | 'Rejeitado';
   // For UI display
   book?: Book;
   user?: User;

@@ -11,7 +11,7 @@ import { addDays } from 'date-fns';
 export async function createBook(formData: FormData) {
   const user = await getCurrentUser();
   if (user?.role !== 'admin') {
-    throw new Error('Unauthorized');
+    throw new Error('Não autorizado');
   }
 
   const newBookData = {
@@ -29,7 +29,7 @@ export async function createBook(formData: FormData) {
 export async function updateBook(bookId: string, formData: FormData) {
     const user = await getCurrentUser();
     if (user?.role !== 'admin') {
-      throw new Error('Unauthorized');
+      throw new Error('Não autorizado');
     }
   
     const bookRef = doc(db, 'books', bookId);
@@ -45,7 +45,7 @@ export async function updateBook(bookId: string, formData: FormData) {
       revalidatePath('/admin/books');
       revalidatePath(`/admin/books/${bookId}/edit`);
     } else {
-        throw new Error('Book not found');
+        throw new Error('Livro não encontrado');
     }
 }
 
@@ -55,20 +55,20 @@ export async function approveRequest(formData: FormData) {
   const adminUser = await getCurrentUser();
 
   if (!adminUser || adminUser.role !== 'admin') {
-     throw new Error('Unauthorized');
+     throw new Error('Não autorizado');
   }
 
   const requestRef = doc(db, 'requests', requestId);
   const requestSnap = await getDoc(requestRef);
 
   if (!requestSnap.exists()) {
-      throw new Error('Request not found.');
+      throw new Error('Solicitação não encontrada.');
   }
 
   const request = requestSnap.data() as Omit<LoanRequest, 'id'>;
 
-  if (request.status !== 'Pending') {
-    throw new Error('Request has already been processed.');
+  if (request.status !== 'Pendente') {
+    throw new Error('A solicitação já foi processada.');
   }
 
   const [book, user] = await Promise.all([
@@ -77,25 +77,25 @@ export async function approveRequest(formData: FormData) {
   ]);
 
   if (!book || !user) {
-      throw new Error('Book or User not found.');
+      throw new Error('Livro ou Usuário não encontrado.');
   }
   
   if (user.status === 'irregular') {
-      await updateDoc(requestRef, { status: 'Rejected' });
+      await updateDoc(requestRef, { status: 'Rejeitado' });
       revalidatePath('/admin');
-      throw new Error(`User is irregular. Request has been rejected.`);
+      throw new Error(`Usuário está irregular. A solicitação foi rejeitada.`);
   }
 
   if (!book.isAvailable) {
-    await updateDoc(requestRef, { status: 'Rejected' });
+    await updateDoc(requestRef, { status: 'Rejeitado' });
     revalidatePath('/admin');
-    throw new Error('Book is no longer available. Request has been rejected.');
+    throw new Error('O livro não está mais disponível. A solicitação foi rejeitada.');
   }
 
   const batch = writeBatch(db);
 
   // 1. Update request status to Approved
-  batch.update(requestRef, { status: 'Approved' });
+  batch.update(requestRef, { status: 'Aprovado' });
   
   // 2. Set book to unavailable
   const bookRef = doc(db, 'books', book.id);
@@ -115,7 +115,7 @@ export async function approveRequest(formData: FormData) {
   
   revalidatePath('/admin');
   revalidatePath('/admin/books');
-  return { success: true, message: 'Request approved and loan created.' };
+  return { success: true, message: 'Solicitação aprovada e empréstimo criado.' };
 }
 
 export async function rejectRequest(formData: FormData) {
@@ -123,12 +123,12 @@ export async function rejectRequest(formData: FormData) {
   const adminUser = await getCurrentUser();
 
   if (!adminUser || adminUser.role !== 'admin') {
-     throw new Error('Unauthorized');
+     throw new Error('Não autorizado');
   }
 
   const requestRef = doc(db, 'requests', requestId);
-  await updateDoc(requestRef, { status: 'Rejected' });
+  await updateDoc(requestRef, { status: 'Rejeitado' });
 
   revalidatePath('/admin');
-  return { success: true, message: 'Request rejected.' };
+  return { success: true, message: 'Solicitação rejeitada.' };
 }

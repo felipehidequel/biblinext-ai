@@ -15,22 +15,22 @@ export default async function AdminBooksPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-headline">Book Management</h1>
-          <p className="text-muted-foreground">Add, edit, or remove books from the catalog.</p>
+          <h1 className="text-3xl font-bold font-headline">Gerenciamento de Livros</h1>
+          <p className="text-muted-foreground">Adicione, edite ou remova livros do catálogo.</p>
         </div>
         <Button asChild>
           <Link href="/admin/books/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Book
+            Adicionar Novo Livro
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Book Catalog</CardTitle>
+          <CardTitle>Catálogo de Livros</CardTitle>
           <CardDescription>
-            There are {books.length} books in the catalog.
+            Existem {books.length} livros no catálogo.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -38,11 +38,11 @@ export default async function AdminBooksPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">Cover</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Author</TableHead>
+                  <TableHead className="w-[80px]">Capa</TableHead>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Autor</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -63,12 +63,12 @@ export default async function AdminBooksPage() {
                       <TableCell>{book.author}</TableCell>
                       <TableCell>
                         <Badge variant={book.isAvailable ? 'secondary' : 'outline'}>
-                          {book.isAvailable ? 'Available' : 'On Loan'}
+                          {book.isAvailable ? 'Disponível' : 'Emprestado'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                          <Button variant="outline" size="sm" asChild>
-                          <Link href={`/admin/books/${book.id}/edit`}>Edit</Link>
+                          <Link href={`/admin/books/${book.id}/edit`}>Editar</Link>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -76,7 +76,7 @@ export default async function AdminBooksPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
-                      No books in catalog.
+                      Nenhum livro no catálogo.
                     </TableCell>
                   </TableRow>
                 )}

@@ -10,10 +10,10 @@ import type { Book } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
 const bookFormSchema = z.object({
-  title: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
-  author: z.string().min(2, { message: 'Author must be at least 2 characters.' }),
-  genre: z.string().min(2, { message: 'Genre must be at least 2 characters.' }),
-  coverImage: z.string().url({ message: 'Please enter a valid URL.' }),
+  title: z.string().min(2, { message: 'O título deve ter pelo menos 2 caracteres.' }),
+  author: z.string().min(2, { message: 'O autor deve ter pelo menos 2 caracteres.' }),
+  genre: z.string().min(2, { message: 'O gênero deve ter pelo menos 2 caracteres.' }),
+  coverImage: z.string().url({ message: 'Por favor, insira uma URL válida.' }),
 });
 
 type BookFormValues = z.infer<typeof bookFormSchema>;
@@ -53,9 +53,9 @@ export function BookForm({ action, book }: BookFormProps) {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Título</FormLabel>
               <FormControl>
-                <Input placeholder="The Midnight Library" {...field} />
+                <Input placeholder="A Biblioteca da Meia-Noite" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -66,7 +66,7 @@ export function BookForm({ action, book }: BookFormProps) {
           name="author"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Author</FormLabel>
+              <FormLabel>Autor</FormLabel>
               <FormControl>
                 <Input placeholder="Matt Haig" {...field} />
               </FormControl>
@@ -79,9 +79,9 @@ export function BookForm({ action, book }: BookFormProps) {
           name="genre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Genre</FormLabel>
+              <FormLabel>Gênero</FormLabel>
               <FormControl>
-                <Input placeholder="Fantasy" {...field} />
+                <Input placeholder="Fantasia" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -92,15 +92,15 @@ export function BookForm({ action, book }: BookFormProps) {
           name="coverImage"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cover Image URL</FormLabel>
+              <FormLabel>URL da Imagem de Capa</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/cover.png" {...field} />
+                <Input placeholder="https://exemplo.com/capa.png" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">{book ? 'Save Changes' : 'Create Book'}</Button>
+        <Button type="submit">{book ? 'Salvar Alterações' : 'Criar Livro'}</Button>
       </form>
     </Form>
   );

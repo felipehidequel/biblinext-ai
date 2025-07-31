@@ -22,7 +22,7 @@ export default function EditBookPage({ params }: { params: { id: string } }) {
 
 
   if (book === undefined) {
-    return <div>Loading...</div>;
+    return <div>Carregando...</div>;
   }
   
   if (book === null) {
@@ -33,7 +33,7 @@ export default function EditBookPage({ params }: { params: { id: string } }) {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold font-headline mb-6">Edit Book</h1>
+      <h1 className="text-3xl font-bold font-headline mb-6">Editar Livro</h1>
       <BookForm action={updateBookWithId} book={book} />
     </div>
   );

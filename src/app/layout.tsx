@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'BiblioNext - Admin',
-  description: 'A modern library management system.',
+  description: 'Um sistema moderno de gerenciamento de biblioteca.',
 };
 
 export default function RootLayout({
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -44,7 +44,7 @@ export default function RootLayout({
             <header className="flex h-16 items-center justify-between border-b px-6">
               <SidebarTrigger className="md:hidden" />
               <div className="ml-auto">
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<div>Carregando...</div>}>
                   <UserNav />
                 </Suspense>
               </div>
