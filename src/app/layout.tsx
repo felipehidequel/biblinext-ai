@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'BiblioNext',
+  title: 'BiblioNext - Admin',
   description: 'A modern library management system.',
 };
 
@@ -28,7 +28,7 @@ export default function RootLayout({
         <SidebarProvider>
           <Sidebar>
             <SidebarHeader className="p-4">
-              <Link href="/">
+              <Link href="/admin/books">
                 <Button variant="ghost" className="h-auto p-0">
                   <h1 className="text-2xl font-bold font-headline text-primary">BiblioNext</h1>
                 </Button>
