@@ -1,0 +1,24 @@
+[
+  {
+    "type": "new_book",
+    "data": {
+      "title": "opa",
+      "author": "testae",
+      "genre": "teste",
+      "coverImage": "https://placehold.co/300x400.png",
+      "isAvailable": true
+    },
+    "failedAt": "2025-07-31T19:15:44.475Z"
+  },
+  {
+    "type": "new_book",
+    "data": {
+      "title": "Hugh Jackson",
+      "author": "Whatsapp",
+      "genre": "Fantasy",
+      "coverImage": "https://placehold.co/300x400.png",
+      "isAvailable": true
+    },
+    "failedAt": "2025-07-31T19:21:47.510Z"
+  }
+]
