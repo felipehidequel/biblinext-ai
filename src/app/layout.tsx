@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -6,6 +7,7 @@ import { UserNav } from '@/components/user-nav';
 import { Toaster } from '@/components/ui/toaster';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'BiblioNext - Admin',
@@ -42,7 +44,9 @@ export default function RootLayout({
             <header className="flex h-16 items-center justify-between border-b px-6">
               <SidebarTrigger className="md:hidden" />
               <div className="ml-auto">
-                <UserNav />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <UserNav />
+                </Suspense>
               </div>
             </header>
             <main className="p-4 sm:p-6 lg:p-8">{children}</main>

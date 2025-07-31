@@ -1,3 +1,4 @@
+
 import { getBooks } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +8,8 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
-export default function AdminBooksPage() {
-  const books = getBooks();
+export default async function AdminBooksPage() {
+  const books = await getBooks();
 
   return (
     <div className="space-y-8">

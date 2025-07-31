@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,10 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getUser } from '@/lib/data';
+import { getCurrentUser } from '@/lib/data';
 
-export function UserNav() {
-  const user = getUser('user-1');
+export async function UserNav() {
+  const user = await getCurrentUser();
 
   if (!user) {
     return null;

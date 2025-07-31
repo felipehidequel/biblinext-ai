@@ -1,129 +1,84 @@
+
+import { collection, getDocs, doc, getDoc, query, where, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
 import type { User, Book, Loan, LoanRequest } from './types';
-import { subDays, addDays } from 'date-fns';
 
-export let users: User[] = [
-  {
-    id: 'user-1',
-    name: 'Alex Doe',
-    email: 'alex.doe@example.com',
-    avatarUrl: 'https://placehold.co/100x100.png',
-    role: 'admin',
-  },
-];
+// Type guards to check if a document snapshot has data
+function isBook(doc: QueryDocumentSnapshot<DocumentData>): doc is QueryDocumentSnapshot<Book> {
+    const data = doc.data();
+    return data.title !== undefined && data.author !== undefined;
+}
 
-export let books: Book[] = [
-  {
-    id: 'book-1',
-    title: 'The Midnight Library',
-    author: 'Matt Haig',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: true,
-    genre: 'Fantasy',
-  },
-  {
-    id: 'book-2',
-    title: 'Project Hail Mary',
-    author: 'Andy Weir',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: false,
-    genre: 'Sci-Fi',
-  },
-  {
-    id: 'book-3',
-    title: 'Klara and the Sun',
-    author: 'Kazuo Ishiguro',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: true,
-    genre: 'Sci-Fi',
-  },
-  {
-    id: 'book-4',
-    title: 'The Four Winds',
-    author: 'Kristin Hannah',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: true,
-    genre: 'Historical Fiction',
-  },
-  {
-    id: 'book-5',
-    title: 'The Push',
-    author: 'Ashley Audrain',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: false,
-    genre: 'Thriller',
-  },
-  {
-    id: 'book-6',
-    title: 'Circe',
-    author: 'Madeline Miller',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: true,
-    genre: 'Fantasy',
-  },
-  {
-    id: 'book-7',
-    title: 'Dune',
-    author: 'Frank Herbert',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: true,
-    genre: 'Sci-Fi',
-  },
-    {
-    id: 'book-8',
-    title: 'Educated',
-    author: 'Tara Westover',
-    coverImage: 'https://placehold.co/300x400.png',
-    isAvailable: true,
-    genre: 'Memoir',
-  },
-];
+function isUser(doc: QueryDocumentSnapshot<DocumentData>): doc is QueryDocumentSnapshot<User> {
+    const data = doc.data();
+    return data.name !== undefined && data.email !== undefined;
+}
 
-export let loans: Loan[] = [
-  {
-    id: 'loan-1',
-    book: books[1],
-    borrowedDate: subDays(new Date(), 10),
-    dueDate: addDays(new Date(), 4),
-  },
-  {
-    id: 'loan-2',
-    book: books[4],
-    borrowedDate: subDays(new Date(), 5),
-    dueDate: addDays(new Date(), 9),
-  },
-];
+function isLoanRequest(doc: QueryDocumentSnapshot<DocumentData>): doc is QueryDocumentSnapshot<LoanRequest> {
+    const data = doc.data();
+    return data.bookId !== undefined && data.userId !== undefined && data.status !== undefined;
+}
 
-export let requests: LoanRequest[] = [
-  {
-    id: 'req-1',
-    book: books[2],
-    requestDate: subDays(new Date(), 2),
-    status: 'Pending',
-  },
-  {
-    id: 'req-2',
-    book: books[0],
-    requestDate: subDays(new Date(), 1),
-    status: 'Approved',
-  },
-    {
-    id: 'req-3',
-    book: books[3],
-    requestDate: subDays(new Date(), 4),
-    status: 'Rejected',
-  },
-  {
-    id: 'req-4',
-    book: books[6],
-    requestDate: subDays(new Date(), 1),
-    status: 'Pending',
-  }
-];
+// Generic function to convert a snapshot to an array of a specific type
+async function getCollectionData<T>(collectionName: string, typeGuard: (doc: QueryDocumentSnapshot<DocumentData>) => doc is QueryDocumentSnapshot<T>): Promise<T[]> {
+    const querySnapshot = await getDocs(collection(db, collectionName));
+    const data: T[] = [];
+    querySnapshot.forEach((doc) => {
+        if (typeGuard(doc)) {
+            data.push({ id: doc.id, ...doc.data() } as T);
+        }
+    });
+    return data;
+}
 
 // Data access functions
-export const getBooks = (): Book[] => books;
-export const getBookById = (id: string): Book | undefined => books.find(b => b.id === id);
-export const getLoansForUser = (userId: string): Loan[] => loans; // simplified
-export const getRequestsForUser = (userId: string): LoanRequest[] => requests; // simplified
-export const getPendingRequests = (): LoanRequest[] => requests.filter(r => r.status === 'Pending');
-export const getUser = (userId: string): User | undefined => users.find(u => u.id === userId);
+export const getBooks = async (): Promise<Book[]> => getCollectionData('books', isBook);
+export const getBookById = async (id: string): Promise<Book | undefined> => {
+    const docRef = doc(db, "books", id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Book;
+    }
+};
+
+export const getUsers = async (): Promise<User[]> => getCollectionData('users', isUser);
+export const getUserById = async (id: string): Promise<User | undefined> => {
+    const docRef = doc(db, "users", id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as User;
+    }
+};
+
+
+export const getPendingRequests = async (): Promise<LoanRequest[]> => {
+    const q = query(collection(db, "requests"), where("status", "==", "Pending"));
+    const querySnapshot = await getDocs(q);
+    const requests: LoanRequest[] = [];
+    
+    for (const docSnap of querySnapshot.docs) {
+        if(isLoanRequest(docSnap)) {
+            const requestData = docSnap.data();
+            const [book, user] = await Promise.all([
+                getBookById(requestData.bookId),
+                getUserById(requestData.userId),
+            ]);
+
+            if (book && user) {
+                 requests.push({ id: docSnap.id, ...requestData, book, user });
+            }
+        }
+    }
+    return requests;
+};
+
+// This is a simplified function. In a real app, you'd get the current authenticated user.
+export const getCurrentUser = async (): Promise<User | undefined> => {
+    // For now, we'll just fetch a user we know is an admin.
+    const q = query(collection(db, "users"), where("role", "==", "admin"));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        const adminDoc = querySnapshot.docs[0];
+        return { id: adminDoc.id, ...adminDoc.data()} as User;
+    }
+};

@@ -1,12 +1,14 @@
+
 import { getPendingRequests } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { approveRequest, rejectRequest } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-export default function AdminPage() {
-  const pendingRequests = getPendingRequests();
+export default async function AdminPage() {
+  const pendingRequests = await getPendingRequests();
 
   return (
     <div className="space-y-8">
@@ -28,7 +30,8 @@ export default function AdminPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Book Title</TableHead>
-                  <TableHead>Author</TableHead>
+                  <TableHead>Requested By</TableHead>
+                  <TableHead>User Status</TableHead>
                   <TableHead>Request Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -37,9 +40,14 @@ export default function AdminPage() {
                 {pendingRequests.length > 0 ? (
                   pendingRequests.map((request) => (
                     <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.book.title}</TableCell>
-                      <TableCell>{request.book.author}</TableCell>
-                      <TableCell>{format(request.requestDate, 'PPP')}</TableCell>
+                      <TableCell className="font-medium">{request.book?.title}</TableCell>
+                      <TableCell>{request.user?.name}</TableCell>
+                      <TableCell>
+                        <Badge variant={request.user?.status === 'regular' ? 'secondary' : 'destructive'}>
+                          {request.user?.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{format(new Date(request.requestDate), 'PPP')}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
                           <form action={approveRequest}>
@@ -56,7 +64,7 @@ export default function AdminPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No pending requests.
                     </TableCell>
                   </TableRow>

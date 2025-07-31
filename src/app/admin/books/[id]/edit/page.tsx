@@ -1,14 +1,32 @@
+
 'use client';
 import { BookForm } from '@/components/book-form';
 import { updateBook } from '@/lib/actions';
 import { getBookById } from '@/lib/data';
 import { notFound } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import type { Book } from '@/lib/types';
 
 export default function EditBookPage({ params }: { params: { id: string } }) {
-  const book = getBookById(params.id);
+  const [book, setBook] = useState<Book | null | undefined>(undefined);
 
-  if (!book) {
-    notFound();
+  useEffect(() => {
+    getBookById(params.id).then(fetchedBook => {
+      if (!fetchedBook) {
+        notFound();
+      } else {
+        setBook(fetchedBook);
+      }
+    });
+  }, [params.id]);
+
+
+  if (book === undefined) {
+    return <div>Loading...</div>;
+  }
+  
+  if (book === null) {
+      notFound();
   }
 
   const updateBookWithId = updateBook.bind(null, book.id);

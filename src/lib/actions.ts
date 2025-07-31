@@ -1,19 +1,20 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { books, requests, users, loans } from './data';
-import type { LoanRequest, Book } from './types';
+import { db } from './firebase';
+import { collection, addDoc, doc, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
+import { getCurrentUser, getUserById, getBookById } from './data';
+import type { Book, LoanRequest, User } from './types';
 import { addDays } from 'date-fns';
 
 export async function createBook(formData: FormData) {
-  const user = users[0];
+  const user = await getCurrentUser();
   if (user?.role !== 'admin') {
     throw new Error('Unauthorized');
   }
 
-  const newBook: Book = {
-    id: `book-${Date.now()}`,
+  const newBookData = {
     title: formData.get('title') as string,
     author: formData.get('author') as string,
     genre: formData.get('genre') as string,
@@ -21,26 +22,26 @@ export async function createBook(formData: FormData) {
     isAvailable: true,
   };
 
-  books.push(newBook);
+  await addDoc(collection(db, 'books'), newBookData);
   revalidatePath('/admin/books');
 }
 
 export async function updateBook(bookId: string, formData: FormData) {
-    const user = users[0];
+    const user = await getCurrentUser();
     if (user?.role !== 'admin') {
       throw new Error('Unauthorized');
     }
   
-    const bookIndex = books.findIndex((b) => b.id === bookId);
-  
-    if (bookIndex !== -1) {
-      books[bookIndex] = {
-        ...books[bookIndex],
+    const bookRef = doc(db, 'books', bookId);
+    const bookDoc = await getDoc(bookRef);
+
+    if (bookDoc.exists()) {
+       await updateDoc(bookRef, {
         title: formData.get('title') as string,
         author: formData.get('author') as string,
         genre: formData.get('genre') as string,
         coverImage: formData.get('coverImage') as string,
-      };
+      });
       revalidatePath('/admin/books');
       revalidatePath(`/admin/books/${bookId}/edit`);
     } else {
@@ -51,40 +52,66 @@ export async function updateBook(bookId: string, formData: FormData) {
 
 export async function approveRequest(formData: FormData) {
   const requestId = formData.get('requestId') as string;
-  const requestIndex = requests.findIndex((r) => r.id === requestId);
-  const user = users[0];
+  const adminUser = await getCurrentUser();
 
-  if (requestIndex === -1 || user?.role !== 'admin') {
-     throw new Error('Failed to approve request. Request not found or unauthorized.');
+  if (!adminUser || adminUser.role !== 'admin') {
+     throw new Error('Unauthorized');
   }
 
-  const request = requests[requestIndex];
+  const requestRef = doc(db, 'requests', requestId);
+  const requestSnap = await getDoc(requestRef);
+
+  if (!requestSnap.exists()) {
+      throw new Error('Request not found.');
+  }
+
+  const request = requestSnap.data() as Omit<LoanRequest, 'id'>;
 
   if (request.status !== 'Pending') {
     throw new Error('Request has already been processed.');
   }
+
+  const [book, user] = await Promise.all([
+    getBookById(request.bookId),
+    getUserById(request.userId),
+  ]);
+
+  if (!book || !user) {
+      throw new Error('Book or User not found.');
+  }
   
-  const bookIndex = books.findIndex((b) => b.id === request.book.id);
-  if (bookIndex === -1 || !books[bookIndex].isAvailable) {
-    requests[requestIndex].status = 'Rejected';
+  if (user.status === 'irregular') {
+      await updateDoc(requestRef, { status: 'Rejected' });
+      revalidatePath('/admin');
+      throw new Error(`User is irregular. Request has been rejected.`);
+  }
+
+  if (!book.isAvailable) {
+    await updateDoc(requestRef, { status: 'Rejected' });
     revalidatePath('/admin');
     throw new Error('Book is no longer available. Request has been rejected.');
   }
 
-  // Set request status to Approved
-  requests[requestIndex].status = 'Approved';
-  
-  // Set book to unavailable
-  books[bookIndex].isAvailable = false;
+  const batch = writeBatch(db);
 
-  // Create a new loan
+  // 1. Update request status to Approved
+  batch.update(requestRef, { status: 'Approved' });
+  
+  // 2. Set book to unavailable
+  const bookRef = doc(db, 'books', book.id);
+  batch.update(bookRef, { isAvailable: false });
+
+  // 3. Create a new loan
+  const loanRef = doc(collection(db, 'loans'));
   const newLoan = {
-    id: `loan-${Date.now()}`,
-    book: books[bookIndex],
-    borrowedDate: new Date(),
-    dueDate: addDays(new Date(), 14), // Loan period of 14 days
+    bookId: book.id,
+    userId: user.id,
+    borrowedDate: new Date().toISOString(),
+    dueDate: addDays(new Date(), 14).toISOString(),
   };
-  loans.push(newLoan);
+  batch.set(loanRef, newLoan);
+  
+  await batch.commit();
   
   revalidatePath('/admin');
   revalidatePath('/admin/books');
@@ -93,17 +120,15 @@ export async function approveRequest(formData: FormData) {
 
 export async function rejectRequest(formData: FormData) {
   const requestId = formData.get('requestId') as string;
-  const requestIndex = requests.findIndex((r) => r.id === requestId);
-  const user = users[0];
+  const adminUser = await getCurrentUser();
 
-  if (requestIndex !== -1 && user?.role === 'admin') {
-    requests[requestIndex].status = 'Rejected';
-    // Note: We are not making the book available again here,
-    // as another user might have a pending request for it.
-    // A more complex system would handle this queue.
-    revalidatePath('/admin');
-    return { success: true, message: 'Request rejected.' };
+  if (!adminUser || adminUser.role !== 'admin') {
+     throw new Error('Unauthorized');
   }
 
-  throw new Error('Failed to reject request.');
+  const requestRef = doc(db, 'requests', requestId);
+  await updateDoc(requestRef, { status: 'Rejected' });
+
+  revalidatePath('/admin');
+  return { success: true, message: 'Request rejected.' };
 }

@@ -1,3 +1,4 @@
+
 export interface Book {
   id: string;
   title: string;
@@ -9,16 +10,21 @@ export interface Book {
 
 export interface Loan {
   id: string;
-  book: Book;
+  bookId: string;
+  userId: string;
   borrowedDate: Date;
   dueDate: Date;
 }
 
 export interface LoanRequest {
-  id: string;
-  book: Book;
+  id:string;
+  bookId: string;
+  userId: string;
   requestDate: Date;
   status: 'Pending' | 'Approved' | 'Rejected';
+  // For UI display
+  book?: Book;
+  user?: User;
 }
 
 export interface User {
@@ -27,4 +33,5 @@ export interface User {
   email: string;
   avatarUrl: string;
   role: 'user' | 'admin';
+  status: 'regular' | 'irregular';
 }
