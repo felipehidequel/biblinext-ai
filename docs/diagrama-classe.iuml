@@ -1,0 +1,87 @@
+@startuml
+title Diagrama de Classe Consolidado - Biblioteca
+
+abstract class Usuario {
+  #id: int
+  #nome: string [cite: 4]
+  #email: string [cite: 4]
+  #senha: string [cite: 4]
+  --
+  +autenticar(login, senha): Usuario [cite: 1, 3]
+}
+
+class Cliente extends Usuario {
+  -telefone: string [cite: 4]
+  --
+  +isRegular(): boolean [cite: 4]
+  +cadastrarCliente(dados): void [cite: 2]
+  +buscarCliente(id): Cliente
+  +criarSolicitacao(livroId): void [cite: 1]
+  +reservarLivro(livroId): void [cite: 1]
+  +renovarEmprestimo(emprestimoId): void [cite: 1]
+}
+
+class Bibliotecario extends Usuario {
+  -nivelAcesso: string [cite: 4]
+  --
+  +aprovarSolicitacao(solicitacaoId): void [cite: 2]
+  +rejeitarSolicitacao(solicitacaoId): void [cite: 2]
+  +registrarDevolucao(emprestimoId): void [cite: 2]
+  +adicionarNovoLivro(titulo, autor): void [cite: 2]
+  +cadastrarNovoCliente(dados): void [cite: 2]
+}
+
+class Livro {
+  -id: int [cite: 4]
+  -titulo: string [cite: 4]
+  -autor: string [cite: 4]
+  -disponivel: boolean [cite: 4]
+  --
+  +adicionarLivro(titulo, autor): void [cite: 2]
+  +atualizarLivro(livro): void
+  +buscarLivro(id): Livro
+  +atualizarDisponibilidade(status): void
+  +isDisponivel(): boolean
+}
+
+class Emprestimo {
+  -id: int [cite: 4]
+  -dataEmprestimo: Date [cite: 4]
+  -dataPrevistaDevolucao: Date [cite: 4]
+  -dataRealDevolucao: Date [cite: 4]
+  -status: string [cite: 4]
+  --
+  +criarEmprestimo(cliente, livro): Emprestimo
+  +registrarDevolucao(): void [cite: 2]
+  +renovarEmprestimo(): void [cite: 1]
+}
+
+class Solicitacao {
+  -id: int [cite: 4]
+  -status: string [cite: 4]
+  --
+  +criarSolicitacao(clienteId, livroId): void [cite: 1, 3]
+  +aprovar(): void [cite: 2, 3]
+  +rejeitar(): void [cite: 2, 3]
+  +listarPendentes(): List [cite: 2, 3]
+  +buscarPorId(id): Solicitacao [cite: 3]
+}
+
+class Reserva {
+  -id: int [cite: 4]
+  -dataReserva: Date [cite: 4]
+  -status: string [cite: 4]
+  --
+  +criarReserva(clienteId, livroId): void [cite: 1]
+  +cancelarReserva(reservaId): void
+  +notificarProximoDaFila(livroId): void
+}
+
+' --- Relacionamentos ---
+Cliente "1" -- "0..*" Emprestimo
+Livro "1" -- "0..*" Emprestimo
+Cliente "1" -- "0..*" Solicitacao
+Livro "1" -- "0..*" Solicitacao
+Cliente "1" -- "0..*" Reserva
+Livro "1" -- "0..*" Reserva
+@enduml

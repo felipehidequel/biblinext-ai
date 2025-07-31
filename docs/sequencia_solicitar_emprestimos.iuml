@@ -1,0 +1,73 @@
+@startuml
+title Diagrama de Sequência - Solicitar Empréstimo
+
+actor Cliente
+participant ":TelaPortalCliente" as Tela
+participant ":AutenticacaoControlador" as AuthControl
+participant ":PortalClienteControlador" as SolicitacaoControl
+participant ":SolicitacaoServico" as SolicitacaoSvc
+participant ":ClienteServico" as ClienteSvc
+participant ":LivroServico" as LivroSvc
+entity "c:Cliente" as ClienteEnt
+entity "l:Livro" as LivroEnt
+entity "s:Solicitacao" as SolicitacaoEnt
+
+skinparam sequenceMessageAlign center
+
+group Pré-condição: Autenticação
+    Cliente -> Tela ++ : 1. Inserir login e senha
+    Tela -> AuthControl ++ : 2. autenticar(login, senha)
+    ... Autenticação ocorre ...
+    AuthControl --> Tela -- : 5. Retorna token/sucesso
+    Tela --> Cliente -- : 6. Exibe tela principal
+end
+
+group Fluxo Principal: Solicitação de Empréstimo
+
+    Cliente -> Tela ++ : 7. Seleciona livro e solicita (clienteId, livroId)
+    Tela -> SolicitacaoControl ++ : 8. criarSolicitacao(clienteId, livroId)
+    
+    ' O Controlador delega a lógica de negócio para o Serviço
+    SolicitacaoControl -> SolicitacaoSvc ++ : 9. criarSolicitacao(clienteId, livroId)
+    
+    ' Passo 1: O Serviço busca as entidades necessárias
+    SolicitacaoSvc -> ClienteSvc ++ : 10. buscarCliente(clienteId)
+    ClienteSvc --> SolicitacaoSvc -- : 11. Retorna [cliente]
+    SolicitacaoSvc -> LivroSvc ++ : 12. buscarLivro(livroId)
+    LivroSvc --> SolicitacaoSvc -- : 13. Retorna [livro]
+
+    ' Passo 2: O Serviço executa as validações
+    alt Cliente com pendências
+        SolicitacaoSvc -> ClienteEnt : 14. isRegular()
+        ClienteEnt --> SolicitacaoSvc -- : 15. Retorna [false]
+        SolicitacaoSvc --> SolicitacaoControl -- : 16. Lança Exceção("Cliente com pendências")
+        SolicitacaoControl --> Tela -- : 17. Retorna erro
+        Tela --> Cliente --: 18. Exibe "Você possui pendências..."
+    
+    else Cliente regular
+        SolicitacaoSvc -> ClienteEnt : 14.1. isRegular()
+        ClienteEnt --> SolicitacaoSvc -- : 15.1. Retorna [true]
+        
+        alt Livro indisponível
+            SolicitacaoSvc -> LivroSvc ++ : 16.1. isDisponivel(livroId)
+            LivroSvc --> SolicitacaoSvc -- : 17.1. Retorna [false]
+            SolicitacaoSvc --> SolicitacaoControl -- : 18.1. Lança Exceção("Livro indisponível")
+            SolicitacaoControl --> Tela -- : 19.1. Retorna erro
+            Tela --> Cliente --: 20.1. Exibe "O livro não está mais disponível"
+        
+        else Todos os pré-requisitos atendidos
+            SolicitacaoSvc -> LivroSvc ++ : 16.2. isDisponivel(livroId)
+            LivroSvc --> SolicitacaoSvc -- : 17.2. Retorna [true]
+            
+            ' Passo 3: O Serviço cria e persiste a nova entidade
+            create SolicitacaoEnt
+            SolicitacaoSvc -> SolicitacaoEnt : 18.2. new(cliente, livro, "Pendente")
+            note right: Persiste a nova solicitação no banco de dados.
+            
+            SolicitacaoSvc --> SolicitacaoControl -- : 19.2. Retorna [SUCESSO]
+            SolicitacaoControl --> Tela -- : 20.2. Retorna [SUCESSO]
+            Tela --> Cliente --: 21.2. Exibe "Solicitação registrada com sucesso!"
+        end
+    end
+end
+@enduml

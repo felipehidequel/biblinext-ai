@@ -46,7 +46,7 @@ Siga os passos abaixo para executar o projeto em seu ambiente local.
 ### 1. Clonar o Repositório
 
 ```bash
-git clone [https://github.com/seu-usuario/biblionext-ai.git](https://github.com/seu-usuario/biblionext-ai.git)
+git clone [https://github.com/felipehidequel/biblinext-ai.git](https://github.com/felipehidequel/biblinext-ai.git)
 cd biblionext-ai
 
 

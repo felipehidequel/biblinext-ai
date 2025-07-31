@@ -1,0 +1,50 @@
+@startuml
+' Diagrama de Componentes da Aplicação BiblioNext com Next.js
+title Arquitetura de Componentes - BiblioNext
+
+!theme spacelab
+
+package "Frontend (Next.js App)" {
+  [Client Components] as Client
+  [Server Components] as Server
+  [Server Actions] as Actions
+}
+
+package "Core da Aplicação" {
+  [Lógica da Aplicação (lib)] as AppLogic
+}
+
+package "Serviços e Infra" {
+  [Auth Provider (NextAuth/Firebase Auth)] as AuthProvider
+  [Acesso a Dados (Firebase SDK)] as DataAccess
+  database "Banco de Dados (Firestore)" as DB
+}
+
+' Notas explicativas
+note right of Client
+  Componentes interativos que
+  invocam Server Actions.
+  Ex: src/components/book-form.tsx
+end note
+
+note right of Server
+  Páginas e componentes que buscam
+  dados diretamente no servidor.
+  Ex: src/app/admin/page.tsx
+end note
+
+note right of Actions
+  Funções que executam a lógica
+  de negócio no servidor.
+  Ex: src/lib/actions.ts
+end note
+
+' Fluxo de dados e dependências
+Client --> Actions : invoca action()
+Server ..> AppLogic : chamada direta de funções
+Actions --> AppLogic
+
+AppLogic --> DataAccess
+DataAccess --> DB
+AppLogic --> AuthProvider
+@enduml
