@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function AdminBooksPage() {
   const books = getBooks();
@@ -16,9 +17,11 @@ export default function AdminBooksPage() {
           <h1 className="text-3xl font-bold font-headline">Book Management</h1>
           <p className="text-muted-foreground">Add, edit, or remove books from the catalog.</p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add New Book
+        <Button asChild>
+          <Link href="/admin/books/new">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Book
+          </Link>
         </Button>
       </div>
 
@@ -63,7 +66,9 @@ export default function AdminBooksPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline" size="sm">Edit</Button>
+                         <Button variant="outline" size="sm" asChild>
+                          <Link href={`/admin/books/${book.id}/edit`}>Edit</Link>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))

@@ -112,10 +112,17 @@ export let requests: LoanRequest[] = [
     requestDate: subDays(new Date(), 4),
     status: 'Rejected',
   },
+  {
+    id: 'req-4',
+    book: books[6],
+    requestDate: subDays(new Date(), 1),
+    status: 'Pending',
+  }
 ];
 
 // Data access functions
 export const getBooks = (): Book[] => books;
+export const getBookById = (id: string): Book | undefined => books.find(b => b.id === id);
 export const getLoansForUser = (userId: string): Loan[] => loans; // simplified
 export const getRequestsForUser = (userId: string): LoanRequest[] => requests; // simplified
 export const getPendingRequests = (): LoanRequest[] => requests.filter(r => r.status === 'Pending');
