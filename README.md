@@ -48,7 +48,7 @@ Siga os passos abaixo para executar o projeto em seu ambiente local.
 ```bash
 git clone [https://github.com/felipehidequel/biblinext-ai.git](https://github.com/felipehidequel/biblinext-ai.git)
 cd biblionext-ai
-
+```
 
 ### 2. Executar
 
@@ -57,5 +57,6 @@ Utilize os comandos:
 ```bash
 npm install
 npm run dev
+```
 
 Por se tratar de um MVP, tem um sistema de fallback para persistir os dados em um JSON para evitar a necessidade de autenticação no Firebase durante o desenvolvimento inicial.
